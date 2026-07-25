@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <!-- Matches ColorScheme.background (light). A night variant lives in values-night. -->
+    <color name="window_background">#FFFDF6FA</color>
+</resources>
