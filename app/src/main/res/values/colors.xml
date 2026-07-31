@@ -3,5 +3,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <!-- Matches ColorScheme.background (light). A night variant lives in values-night. -->
-    <color name="window_background">#FFFDF6FA</color>
+    <color name="window_background">#FFFFF8F3</color>
 </resources>
