@@ -55,6 +55,8 @@ dependencies {
     // Firebase AI Logic — no API key in the app, no backend to run.
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
+    // Carries the model id, so a retired model is a console edit and not an app release.
+    implementation(libs.firebase.config)
     // App Check keeps the Gemini endpoint from being called by anything but this app.
     // Base library both variants need; each provider ships only in its own build type.
     implementation(libs.firebase.appcheck)
