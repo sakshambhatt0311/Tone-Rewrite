@@ -13,6 +13,9 @@ import com.google.firebase.ai.type.RequestTimeoutException
 import com.google.firebase.ai.type.ResponseStoppedException
 import com.google.firebase.ai.type.Schema
 import com.google.firebase.ai.type.ServerException
+import com.google.firebase.ai.type.HarmBlockThreshold
+import com.google.firebase.ai.type.HarmCategory
+import com.google.firebase.ai.type.SafetySetting
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import kotlinx.coroutines.CancellationException
@@ -64,6 +67,12 @@ class FirebaseAiService(
                 responseMimeType = "application/json"
                 responseSchema = REWRITE_SCHEMA
             },
+            safetySettings = listOf(
+                SafetySetting(HarmCategory.HARASSMENT, HarmBlockThreshold.NONE),
+                SafetySetting(HarmCategory.HATE_SPEECH, HarmBlockThreshold.NONE),
+                SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, HarmBlockThreshold.NONE),
+                SafetySetting(HarmCategory.DANGEROUS_CONTENT, HarmBlockThreshold.NONE)
+            ),
             systemInstruction = content { text(PromptFactory.systemInstruction(request)) }
         )
 
