@@ -8,23 +8,23 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 /**
- * Fixed blue+pink brand, one light scheme and one dark. Dynamic colour is deliberately off: the
- * palette is the product's identity, and wallpaper tinting would break the diff-highlight
- * contrast the result panel relies on.
+ * The Ember scheme, one light and one dark. Dynamic colour is deliberately off: the warm-neutral
+ * shell and its single amber accent are the product's identity, and wallpaper tinting would break
+ * the diff-highlight contrast the result card relies on.
  */
 private val ToneLightScheme: ColorScheme = lightColorScheme(
-    primary = PinkPrimaryLight,
-    onPrimary = OnPinkPrimaryLight,
-    primaryContainer = PinkContainerLight,
-    onPrimaryContainer = OnPinkContainerLight,
-    secondary = PinkSecondaryLight,
-    onSecondary = OnPinkSecondaryLight,
-    secondaryContainer = PinkSecondaryContainerLight,
-    onSecondaryContainer = OnPinkSecondaryContainerLight,
-    tertiary = BlueTertiaryLight,
-    onTertiary = OnBlueTertiaryLight,
-    tertiaryContainer = BlueTertiaryContainerLight,
-    onTertiaryContainer = OnBlueTertiaryContainerLight,
+    primary = AmberPrimaryLight,
+    onPrimary = OnAmberPrimaryLight,
+    primaryContainer = AmberContainerLight,
+    onPrimaryContainer = OnAmberContainerLight,
+    secondary = WarmSecondaryLight,
+    onSecondary = OnWarmSecondaryLight,
+    secondaryContainer = WarmSecondaryContainerLight,
+    onSecondaryContainer = OnWarmSecondaryContainerLight,
+    tertiary = SageTertiaryLight,
+    onTertiary = OnSageTertiaryLight,
+    tertiaryContainer = SageTertiaryContainerLight,
+    onTertiaryContainer = OnSageTertiaryContainerLight,
     background = BackgroundLight,
     onBackground = OnBackgroundLight,
     surface = SurfaceLight,
@@ -45,18 +45,18 @@ private val ToneLightScheme: ColorScheme = lightColorScheme(
 )
 
 private val ToneDarkScheme: ColorScheme = darkColorScheme(
-    primary = PinkPrimaryDark,
-    onPrimary = OnPinkPrimaryDark,
-    primaryContainer = PinkContainerDark,
-    onPrimaryContainer = OnPinkContainerDark,
-    secondary = PinkSecondaryDark,
-    onSecondary = OnPinkSecondaryDark,
-    secondaryContainer = PinkSecondaryContainerDark,
-    onSecondaryContainer = OnPinkSecondaryContainerDark,
-    tertiary = BlueTertiaryDark,
-    onTertiary = OnBlueTertiaryDark,
-    tertiaryContainer = BlueTertiaryContainerDark,
-    onTertiaryContainer = OnBlueTertiaryContainerDark,
+    primary = AmberPrimaryDark,
+    onPrimary = OnAmberPrimaryDark,
+    primaryContainer = AmberContainerDark,
+    onPrimaryContainer = OnAmberContainerDark,
+    secondary = WarmSecondaryDark,
+    onSecondary = OnWarmSecondaryDark,
+    secondaryContainer = WarmSecondaryContainerDark,
+    onSecondaryContainer = OnWarmSecondaryContainerDark,
+    tertiary = SageTertiaryDark,
+    onTertiary = OnSageTertiaryDark,
+    tertiaryContainer = SageTertiaryContainerDark,
+    onTertiaryContainer = OnSageTertiaryContainerDark,
     background = BackgroundDark,
     onBackground = OnBackgroundDark,
     surface = SurfaceDark,
