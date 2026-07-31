@@ -3,45 +3,49 @@ package com.bhatt.tonerewriter.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * "Bubblegum & Sky" — a fixed blue+pink brand, expressed as full Material 3 tonal palettes for
- * both light and dark. Pink drives [primary] (buttons, selection, slider); blue rides on
- * [tertiary] (secondary actions, "try another tone") so the two colours read as different jobs
- * rather than one flat accent. Dynamic colour stays off on purpose: the identity is the point,
- * and it keeps the result-panel diff contrast predictable.
+ * "Ember" — a warm neutral shell lit by a single amber accent.
  *
- * Seeds: pink #EC4899, blue #3B82F6.
+ * The dark scheme is the primary one: near-black browns for [surface] and its containers, amber
+ * for [primary], and a muted sage on [tertiary] so the rare third role never competes with the
+ * accent. The light scheme is the same amber seed inverted onto warm cream, so switching the
+ * system theme changes the lighting, not the identity.
+ *
+ * Dynamic colour stays off on purpose. The result panel's diff highlight is [primaryContainer]
+ * behind [onSurface] text, and wallpaper tinting would put that contrast out of our hands.
+ *
+ * Seed: amber #FFB95C.
  */
 
 // ---- Dark ----
-val PinkPrimaryDark = Color(0xFFFF8FC0)
-val OnPinkPrimaryDark = Color(0xFF5A0E33)
-val PinkContainerDark = Color(0xFF8A2957)
-val OnPinkContainerDark = Color(0xFFFFD9E7)
+val AmberPrimaryDark = Color(0xFFFFB95C)
+val OnAmberPrimaryDark = Color(0xFF452B00)
+val AmberContainerDark = Color(0xFF5E3D00)
+val OnAmberContainerDark = Color(0xFFFFDDB5)
 
-val PinkSecondaryDark = Color(0xFFE5A9C4)
-val OnPinkSecondaryDark = Color(0xFF45182E)
-val PinkSecondaryContainerDark = Color(0xFF5C3247)
-val OnPinkSecondaryContainerDark = Color(0xFFFFD9E7)
+val WarmSecondaryDark = Color(0xFFDDC3A2)
+val OnWarmSecondaryDark = Color(0xFF3E2E16)
+val WarmSecondaryContainerDark = Color(0xFF3A3225)
+val OnWarmSecondaryContainerDark = Color(0xFFEBDFC9)
 
-val BlueTertiaryDark = Color(0xFF93C5FD)
-val OnBlueTertiaryDark = Color(0xFF0A2C5A)
-val BlueTertiaryContainerDark = Color(0xFF1E3A73)
-val OnBlueTertiaryContainerDark = Color(0xFFD6E6FF)
+val SageTertiaryDark = Color(0xFFB7CE9C)
+val OnSageTertiaryDark = Color(0xFF24350E)
+val SageTertiaryContainerDark = Color(0xFF394B22)
+val OnSageTertiaryContainerDark = Color(0xFFD3EAB7)
 
-val BackgroundDark = Color(0xFF141017)
-val OnBackgroundDark = Color(0xFFECE3EC)
-val SurfaceDark = Color(0xFF141017)
-val OnSurfaceDark = Color(0xFFECE3EC)
-val SurfaceVariantDark = Color(0xFF262029)
-val OnSurfaceVariantDark = Color(0xFFB4A9B4)
-val OutlineDark = Color(0xFF4A4250)
-val OutlineVariantDark = Color(0xFF322B38)
+val BackgroundDark = Color(0xFF17130E)
+val OnBackgroundDark = Color(0xFFEDE0D3)
+val SurfaceDark = Color(0xFF17130E)
+val OnSurfaceDark = Color(0xFFEDE0D3)
+val SurfaceVariantDark = Color(0xFF4E4335)
+val OnSurfaceVariantDark = Color(0xFFC6B7A6)
+val OutlineDark = Color(0xFF8F8171)
+val OutlineVariantDark = Color(0xFF3C332A)
 
-val SurfaceContainerLowestDark = Color(0xFF0E0B12)
-val SurfaceContainerLowDark = Color(0xFF1C1720)
-val SurfaceContainerDark = Color(0xFF201B25)
-val SurfaceContainerHighDark = Color(0xFF2A2430)
-val SurfaceContainerHighestDark = Color(0xFF352E3B)
+val SurfaceContainerLowestDark = Color(0xFF100D09)
+val SurfaceContainerLowDark = Color(0xFF1B1712)
+val SurfaceContainerDark = Color(0xFF221D17)
+val SurfaceContainerHighDark = Color(0xFF2D271F)
+val SurfaceContainerHighestDark = Color(0xFF3A3229)
 
 val ErrorDark = Color(0xFFFFB4AB)
 val OnErrorDark = Color(0xFF690005)
@@ -49,49 +53,37 @@ val ErrorContainerDark = Color(0xFF93000A)
 val OnErrorContainerDark = Color(0xFFFFDAD6)
 
 // ---- Light ----
-val PinkPrimaryLight = Color(0xFFD01A6B)
-val OnPinkPrimaryLight = Color(0xFFFFFFFF)
-val PinkContainerLight = Color(0xFFFFD9E7)
-val OnPinkContainerLight = Color(0xFF3F0021)
+val AmberPrimaryLight = Color(0xFF8A5100)
+val OnAmberPrimaryLight = Color(0xFFFFFFFF)
+val AmberContainerLight = Color(0xFFFFDDB5)
+val OnAmberContainerLight = Color(0xFF2C1600)
 
-val PinkSecondaryLight = Color(0xFF8C4A67)
-val OnPinkSecondaryLight = Color(0xFFFFFFFF)
-val PinkSecondaryContainerLight = Color(0xFFFFD9E7)
-val OnPinkSecondaryContainerLight = Color(0xFF37041F)
+val WarmSecondaryLight = Color(0xFF745943)
+val OnWarmSecondaryLight = Color(0xFFFFFFFF)
+val WarmSecondaryContainerLight = Color(0xFFF5E0CB)
+val OnWarmSecondaryContainerLight = Color(0xFF2A1707)
 
-val BlueTertiaryLight = Color(0xFF1D5BD6)
-val OnBlueTertiaryLight = Color(0xFFFFFFFF)
-val BlueTertiaryContainerLight = Color(0xFFD8E5FF)
-val OnBlueTertiaryContainerLight = Color(0xFF001A43)
+val SageTertiaryLight = Color(0xFF4C6634)
+val OnSageTertiaryLight = Color(0xFFFFFFFF)
+val SageTertiaryContainerLight = Color(0xFFCDEDAF)
+val OnSageTertiaryContainerLight = Color(0xFF0D2000)
 
-val BackgroundLight = Color(0xFFFDF6FA)
-val OnBackgroundLight = Color(0xFF201A20)
-val SurfaceLight = Color(0xFFFDF6FA)
-val OnSurfaceLight = Color(0xFF201A20)
-val SurfaceVariantLight = Color(0xFFF1E4EC)
-val OnSurfaceVariantLight = Color(0xFF6E5D68)
-val OutlineLight = Color(0xFF857381)
-val OutlineVariantLight = Color(0xFFD8C7D0)
+val BackgroundLight = Color(0xFFFFF8F3)
+val OnBackgroundLight = Color(0xFF211A14)
+val SurfaceLight = Color(0xFFFFF8F3)
+val OnSurfaceLight = Color(0xFF211A14)
+val SurfaceVariantLight = Color(0xFFF2E0CF)
+val OnSurfaceVariantLight = Color(0xFF52443A)
+val OutlineLight = Color(0xFF85735F)
+val OutlineVariantLight = Color(0xFFD7C3B0)
 
 val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
-val SurfaceContainerLowLight = Color(0xFFFCEFF5)
-val SurfaceContainerLight = Color(0xFFF7E9F0)
-val SurfaceContainerHighLight = Color(0xFFF1E3EB)
-val SurfaceContainerHighestLight = Color(0xFFEBDDE5)
+val SurfaceContainerLowLight = Color(0xFFFFF2E7)
+val SurfaceContainerLight = Color(0xFFFCECE0)
+val SurfaceContainerHighLight = Color(0xFFF7E6DA)
+val SurfaceContainerHighestLight = Color(0xFFF1E0D4)
 
 val ErrorLight = Color(0xFFBA1A1A)
 val OnErrorLight = Color(0xFFFFFFFF)
 val ErrorContainerLight = Color(0xFFFFDAD6)
 val OnErrorContainerLight = Color(0xFF410002)
-
-// ---- Brand constants (same in both themes) ----
-// The result panel deliberately inverts to a light pink surface so the rewrite reads as the
-// payload, and the diff highlight is blue for genuine contrast against it. Because the panel is
-// theme-independent, its controls carry fixed colours instead of the flipping scheme roles.
-val ResultSurface = Color(0xFFFCE7F0)
-val ResultOnSurface = Color(0xFF2A1420)
-val ResultHighlight = Color(0xFFCFE0FA)
-val ResultButton = Color(0xFFC21E63)
-val OnResultButton = Color(0xFFFFFFFF)
-val ResultTonalContainer = Color(0xFFF4CFDF)
-val OnResultTonalContainer = Color(0xFF6B1B3D)
