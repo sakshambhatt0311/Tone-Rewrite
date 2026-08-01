@@ -8,14 +8,12 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,52 +25,55 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.ContentPaste
-import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.SentimentSatisfiedAlt
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.VolunteerActivism
 import androidx.compose.material.icons.outlined.Work
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,13 +81,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bhatt.tonerewriter.domain.Strength
 import com.bhatt.tonerewriter.domain.Tone
-import com.bhatt.tonerewriter.ui.theme.OnResultButton
-import com.bhatt.tonerewriter.ui.theme.OnResultTonalContainer
-import com.bhatt.tonerewriter.ui.theme.ResultButton
-import com.bhatt.tonerewriter.ui.theme.ResultHighlight
-import com.bhatt.tonerewriter.ui.theme.ResultOnSurface
-import com.bhatt.tonerewriter.ui.theme.ResultSurface
-import com.bhatt.tonerewriter.ui.theme.ResultTonalContainer
 import com.bhatt.tonerewriter.ui.theme.ToneRewriterTheme
 
 /**
@@ -124,30 +118,14 @@ fun RewriteScreen(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            LargeTopAppBar(
-                title = {
-                    Text(
-                        text = "Rewrite",
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        }
+        containerColor = MaterialTheme.colorScheme.surface,
+        topBar = { BrandBar(scrollBehavior = scrollBehavior) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -157,21 +135,21 @@ fun RewriteScreen(
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 32.dp)
         ) {
+            Headline()
+            Spacer(Modifier.height(20.dp))
+
             InputCard(
                 value = state.input,
                 charCount = state.charCount,
                 onValueChange = onInputChange,
                 onPaste = { context.readClipboard()?.let(onInputChange) }
             )
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(12.dp))
 
-            SectionLabel("Tone")
-            Spacer(Modifier.height(10.dp))
-            ToneChips(selected = state.tone, onSelect = onToneSelected)
-            Spacer(Modifier.height(16.dp))
+            ToneTiles(selected = state.tone, onSelect = onToneSelected)
+            Spacer(Modifier.height(14.dp))
 
-            StrengthSlider(value = state.strength, onChange = onStrengthChange)
-            Spacer(Modifier.height(20.dp))
+            StrengthToggle(selected = state.strengthBucket, onChange = onStrengthChange)
 
             RewriteButton(enabled = state.canRewrite, onClick = onRewrite)
 
@@ -181,9 +159,7 @@ fun RewriteScreen(
                 exit = fadeOut()
             ) {
                 Column {
-                    Spacer(Modifier.height(24.dp))
-                    SectionLabel("Result")
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(18.dp))
 
                     when (val result = state.result) {
                         is ResultState.Idle -> Unit
@@ -196,39 +172,88 @@ fun RewriteScreen(
                             onRetry = onRewrite
                         )
 
-                        is ResultState.Success -> {
-                            ResultCard(
-                                result = result,
-                                onCopy = {
-                                    context.copyToClipboard(result.rewrite)
-                                    Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
-                                },
-                                onShare = { context.share(result.rewrite) },
-                                onRegenerate = onRewrite
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            TryAnotherTone(current = result.tone, onSelect = onToneSelected)
-                        }
+                        is ResultState.Success -> ResultCard(
+                            result = result,
+                            onCopy = {
+                                context.copyToClipboard(result.rewrite)
+                                Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                            },
+                            onShare = { context.share(result.rewrite) },
+                            onRegenerate = onRewrite
+                        )
                     }
                 }
             }
 
             if (state.history.isNotEmpty()) {
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(26.dp))
+                SectionLabel("Recent")
+                Spacer(Modifier.height(4.dp))
                 HistoryList(entries = state.history, onSelect = onHistorySelected)
             }
         }
     }
 }
 
+/** Small bar: brand mark plus the app name, so the screen's own headline can carry the weight. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SectionLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colorScheme.onBackground
+private fun BrandBar(scrollBehavior: TopAppBarScrollBehavior) {
+    TopAppBar(
+        title = {
+            Text(
+                text = "Tone Rewriter",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        navigationIcon = {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = CircleShape,
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .size(34.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Outlined.AutoAwesome,
+                        contentDescription = null,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+            }
+        },
+        scrollBehavior = scrollBehavior,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
     )
+}
+
+@Composable
+private fun Headline() {
+    Column {
+        Text(
+            text = buildAnnotatedString {
+                append("Say it ")
+                withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                    append("better.")
+                }
+            },
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            letterSpacing = (-0.5).sp
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Paste anything. Pick a tone. Ship it.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
@@ -239,12 +264,15 @@ private fun InputCard(
     onPaste: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(Modifier.padding(18.dp)) {
-            Box(Modifier.heightIn(min = 96.dp)) {
+        Column(Modifier.padding(16.dp)) {
+            // Roughly two lines. Enough that an empty field still reads as a text area, low
+            // enough that the footer sits right under the text instead of floating below a gap.
+            Box(Modifier.heightIn(min = 52.dp)) {
                 if (value.isEmpty()) {
                     Text(
                         text = "Paste or type what you want to say…",
@@ -260,96 +288,168 @@ private fun InputCard(
                         fontSize = 16.sp,
                         lineHeight = 24.sp
                     ),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            val fraction = (charCount.toFloat() / RewriteUiState.MAX_CHARS).coerceIn(0f, 1f)
-            LinearProgressIndicator(
-                progress = { fraction },
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-            )
-
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(14.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    onClick = onPaste,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    shape = CircleShape
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ContentPaste,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text("Paste", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                // The counter is the only cap warning left, so it turns red as the limit nears.
+                val nearLimit = charCount > RewriteUiState.MAX_CHARS * 0.9f
                 Text(
                     text = "$charCount / ${RewriteUiState.MAX_CHARS}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.Outlined.ContentPaste,
-                    contentDescription = "Paste from clipboard",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable(onClick = onPaste)
+                    color = if (nearLimit) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                 )
             }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * Four tones as a 2×2 grid of described tiles. Laid out by hand rather than with a lazy grid
+ * because the whole screen is already inside a vertical scroll.
+ */
 @Composable
-private fun ToneChips(selected: Tone, onSelect: (Tone) -> Unit) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Tone.entries.forEach { tone ->
-            val isSelected = tone == selected
-            FilterChip(
-                selected = isSelected,
-                onClick = { onSelect(tone) },
-                label = { Text(tone.label) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (isSelected) Icons.Outlined.Check else tone.icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+private fun ToneTiles(selected: Tone, onSelect: (Tone) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Tone.entries.chunked(2).forEach { pair ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                pair.forEach { tone ->
+                    ToneTile(
+                        tone = tone,
+                        selected = tone == selected,
+                        onClick = { onSelect(tone) },
+                        modifier = Modifier.weight(1f)
                     )
-                },
-                shape = RoundedCornerShape(16.dp)
-            )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun StrengthSlider(value: Float, onChange: (Float) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "subtle",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Slider(
-            value = value,
-            onValueChange = onChange,
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 12.dp)
-        )
-        Text(
-            text = "strong",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+private fun ToneTile(
+    tone: Tone,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scheme = MaterialTheme.colorScheme
+    Surface(
+        selected = selected,
+        onClick = onClick,
+        color = if (selected) scheme.primaryContainer else scheme.surfaceContainer,
+        contentColor = if (selected) scheme.onPrimaryContainer else scheme.onSurface,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, if (selected) scheme.primary else scheme.outlineVariant),
+        modifier = modifier
+    ) {
+        // Icon inline with the label rather than stacked above it — the stacked version spent a
+        // whole row on a 21dp glyph, which is most of what made these tiles tall.
+        Column(Modifier.padding(horizontal = 13.dp, vertical = 11.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(tone.icon, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = tone.label,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
+                if (selected) {
+                    Icon(
+                        imageVector = Icons.Outlined.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = tone.blurb,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (selected) {
+                    scheme.onPrimaryContainer.copy(alpha = 0.8f)
+                } else {
+                    scheme.onSurfaceVariant
+                }
+            )
+        }
+    }
+}
+
+/**
+ * The three [Strength] buckets, shown directly instead of behind a continuous slider. The
+ * ViewModel still takes a 0f..1f value, so each option emits the midpoint of its bucket.
+ */
+@Composable
+private fun StrengthToggle(selected: Strength, onChange: (Float) -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = CircleShape,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(4.dp)) {
+            Strength.entries.forEach { strength ->
+                val isSelected = strength == selected
+                Surface(
+                    selected = isSelected,
+                    onClick = { onChange(strength.sliderValue) },
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        Color.Transparent
+                    },
+                    contentColor = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    shape = CircleShape,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = strength.label,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -359,33 +459,55 @@ private fun RewriteButton(enabled: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(20.dp),
-        contentPadding = PaddingValues(vertical = 18.dp),
-        modifier = Modifier.fillMaxWidth()
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        contentPadding = PaddingValues(vertical = 17.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 18.dp)
     ) {
+        Icon(Icons.Outlined.AutoAwesome, contentDescription = null, modifier = Modifier.size(19.dp))
+        Spacer(Modifier.width(10.dp))
         Text(
             text = "Rewrite",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Medium
         )
     }
 }
 
+/** Shared shell for the three result states, so they can't drift apart visually. */
+@Composable
+private fun ResultShell(content: @Composable () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier.fillMaxWidth(),
+        content = content
+    )
+}
+
 @Composable
 private fun LoadingCard(tone: Tone) {
-    Surface(color = ResultSurface, shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
+    ResultShell {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             modifier = Modifier.padding(20.dp)
         ) {
             CircularProgressIndicator(
-                color = ResultButton,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 3.dp,
                 modifier = Modifier.size(22.dp)
             )
             Text(
                 text = "Rewriting in ${tone.label.lowercase()}…",
-                color = ResultOnSurface,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 15.sp
             )
         }
@@ -399,71 +521,57 @@ private fun ResultCard(
     onShare: () -> Unit,
     onRegenerate: () -> Unit
 ) {
+    val highlight = MaterialTheme.colorScheme.primaryContainer
     // Diff is pure and input-capped, so recompute only when the pair actually changes.
-    val highlighted = remember(result.source, result.rewrite) {
-        highlightChanges(result.source, result.rewrite, ResultHighlight)
+    val highlighted = remember(result.source, result.rewrite, highlight) {
+        highlightChanges(result.source, result.rewrite, highlight)
     }
 
-    Surface(color = ResultSurface, shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(18.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(result.tone.label) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = result.tone.icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(AssistChipDefaults.IconSize)
-                        )
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = ResultTonalContainer,
-                        disabledLabelColor = OnResultTonalContainer,
-                        disabledLeadingIconContentColor = OnResultTonalContainer
-                    )
-                )
-                Text(
-                    text = "· ${result.strength.label.lowercase()}",
-                    color = ResultOnSurface.copy(alpha = 0.55f),
-                    fontSize = 13.sp
-                )
-            }
+    ResultShell {
+        Column(Modifier.padding(17.dp)) {
+            Text(
+                text = "${result.tone.label} · ${result.strength.label}".uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 0.8.sp
+            )
 
             Spacer(Modifier.height(12.dp))
 
             Text(
                 text = highlighted,
-                color = ResultOnSurface,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
-                lineHeight = 24.sp
+                lineHeight = 25.sp
             )
+
+            Spacer(Modifier.height(14.dp))
+
+            ChangeLegend(changedRuns = highlighted.spanStyles.size, swatch = highlight)
 
             Spacer(Modifier.height(16.dp))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
                     onClick = onCopy,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ResultButton,
-                        contentColor = OnResultButton
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
+                    contentPadding = PaddingValues(vertical = 13.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Outlined.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = null,
+                        modifier = Modifier.size(17.dp)
+                    )
                     Spacer(Modifier.width(8.dp))
-                    Text("Copy", fontWeight = FontWeight.SemiBold)
+                    Text("Copy", fontWeight = FontWeight.Medium)
                 }
                 ResultIconAction(Icons.Outlined.Share, "Share rewrite", onShare)
                 ResultIconAction(Icons.Outlined.Refresh, "Rewrite again", onRegenerate)
@@ -472,15 +580,38 @@ private fun ResultCard(
     }
 }
 
+/** Tells the reader what the highlighted spans mean, and how much actually moved. */
+@Composable
+private fun ChangeLegend(changedRuns: Int, swatch: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            Modifier
+                .size(11.dp)
+                .background(swatch, RoundedCornerShape(3.dp))
+        )
+        Text(
+            text = when (changedRuns) {
+                0 -> "No changes needed"
+                1 -> "1 phrase rewritten"
+                else -> "$changedRuns phrases rewritten"
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
 @Composable
 private fun ResultIconAction(icon: ImageVector, description: String, onClick: () -> Unit) {
-    FilledTonalIconButton(
+    IconButton(
         onClick = onClick,
-        colors = IconButtonDefaults.filledTonalIconButtonColors(
-            containerColor = ResultTonalContainer,
-            contentColor = OnResultTonalContainer
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        modifier = Modifier.size(52.dp)
+        modifier = Modifier.size(48.dp)
     ) {
         Icon(imageVector = icon, contentDescription = description, modifier = Modifier.size(20.dp))
     }
@@ -490,7 +621,7 @@ private fun ResultIconAction(icon: ImageVector, description: String, onClick: ()
 private fun ErrorCard(message: String, retryable: Boolean, onRetry: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(18.dp)) {
@@ -501,35 +632,10 @@ private fun ErrorCard(message: String, retryable: Boolean, onRetry: () -> Unit) 
             )
             if (retryable) {
                 TextButton(onClick = onRetry, contentPadding = PaddingValues(0.dp)) {
-                    Text("Try again", color = MaterialTheme.colorScheme.onErrorContainer, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun TryAnotherTone(current: Tone, onSelect: (Tone) -> Unit) {
-    Column {
-        Text(
-            text = "Try another tone",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(10.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Tone.entries.filter { it != current }.forEach { tone ->
-                Surface(
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.clickable { onSelect(tone) }
-                ) {
                     Text(
-                        text = tone.label,
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                        text = "Try again",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -541,36 +647,57 @@ private fun TryAnotherTone(current: Tone, onSelect: (Tone) -> Unit) {
 private fun HistoryList(entries: List<HistoryEntry>, onSelect: (HistoryEntry) -> Unit) {
     Column {
         entries.forEach { entry ->
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onSelect(entry) }
-                    .padding(vertical = 10.dp)
+                    .padding(vertical = 12.dp)
             ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    shape = RoundedCornerShape(11.dp),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(entry.tone.icon, contentDescription = null, modifier = Modifier.size(17.dp))
+                    }
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = entry.source,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = entry.tone.label,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
                 Icon(
-                    imageVector = Icons.Outlined.History,
+                    imageVector = Icons.Outlined.ChevronRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = entry.source.take(48).let { if (it.length < entry.source.length) "$it…" else it },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = entry.tone.label,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    style = MaterialTheme.typography.labelLarge,
-                    textAlign = TextAlign.End
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 private val Tone.icon: ImageVector
@@ -579,6 +706,14 @@ private val Tone.icon: ImageVector
         Tone.FRIENDLY -> Icons.Outlined.SentimentSatisfiedAlt
         Tone.APOLOGETIC -> Icons.Outlined.VolunteerActivism
         Tone.FIRM -> Icons.Outlined.Bolt
+    }
+
+/** Midpoint of each bucket, so [Strength.from] round-trips the value the toggle emits. */
+private val Strength.sliderValue: Float
+    get() = when (this) {
+        Strength.SUBTLE -> 0.15f
+        Strength.BALANCED -> 0.5f
+        Strength.STRONG -> 0.85f
     }
 
 private fun Context.clipboard(): ClipboardManager? =
@@ -601,7 +736,7 @@ private fun Context.share(text: String) {
     startActivity(Intent.createChooser(intent, "Share rewrite"))
 }
 
-@Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF141017)
+@Preview(name = "Dark", showBackground = true, backgroundColor = 0xFF17130E)
 @Composable
 private fun RewriteScreenPreviewDark() {
     ToneRewriterTheme {
@@ -616,7 +751,7 @@ private fun RewriteScreenPreviewDark() {
     }
 }
 
-@Preview(name = "Light", showBackground = true, backgroundColor = 0xFFFDF6FA)
+@Preview(name = "Light", showBackground = true, backgroundColor = 0xFFFFF8F3)
 @Composable
 private fun RewriteScreenPreviewLight() {
     ToneRewriterTheme {
@@ -640,5 +775,12 @@ private val previewState = RewriteUiState(
             "appreciate a short extension. Apologies for the inconvenience.",
         tone = Tone.FORMAL,
         strength = Strength.BALANCED
+    ),
+    history = listOf(
+        HistoryEntry(
+            source = "thanks for covering my shift yesterday",
+            rewrite = "Thank you for covering my shift yesterday.",
+            tone = Tone.FRIENDLY
+        )
     )
 )
