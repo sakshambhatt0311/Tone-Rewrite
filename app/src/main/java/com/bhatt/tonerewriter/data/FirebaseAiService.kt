@@ -5,6 +5,7 @@ import com.bhatt.tonerewriter.domain.RewriteRequest
 import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.FinishReason
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.InvalidAPIKeyException
 import com.google.firebase.ai.type.PromptBlockedException
@@ -31,7 +32,8 @@ import java.io.IOException
  * swapping it for [GenerativeBackend.vertexAI] is the only change needed to move to Vertex AI.
  */
 class FirebaseAiService(
-    private val modelName: String = DEFAULT_MODEL
+    /** A provider, not a value, so a Remote Config activate is picked up without a restart. */
+    private val modelName: () -> String = ModelConfig::modelName
 ) : ToneRewriteService {
 
     override suspend fun rewrite(request: RewriteRequest): Result<String> = try {
@@ -58,20 +60,30 @@ class FirebaseAiService(
      */
     private fun modelFor(request: RewriteRequest): GenerativeModel =
         Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
-            modelName = modelName,
+            modelName = modelName(),
             generationConfig = generationConfig {
                 temperature = 0.7f
-                maxOutputTokens = 600
+                // Gemini 3.x always thinks, and thinking tokens count against this ceiling, so
+                // it has to cover the reasoning as well as the sentence we actually want back.
+                // Too low and generation stops on MAX_TOKENS having emitted no text at all.
+                //
+                // Thinking is deliberately not configured: the 3.x series controls it with
+                // thinking_level, and ThinkingConfig in firebase-ai 17.1.0 only exposes the 2.5
+                // series' thinking_budget. Sending a budget here is the wrong parameter family.
+                maxOutputTokens = 2048
                 // Constrained decoding: the model must answer {"rewrite": "..."} and cannot
                 // prepend "Sure, here's your rewrite:".
                 responseMimeType = "application/json"
                 responseSchema = REWRITE_SCHEMA
             },
+            // Already as permissive as the API allows. Anything still blocked is caught by
+            // Gemini's non-configurable core filters, which no client setting can turn off.
             safetySettings = listOf(
                 SafetySetting(HarmCategory.HARASSMENT, HarmBlockThreshold.NONE),
                 SafetySetting(HarmCategory.HATE_SPEECH, HarmBlockThreshold.NONE),
                 SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, HarmBlockThreshold.NONE),
-                SafetySetting(HarmCategory.DANGEROUS_CONTENT, HarmBlockThreshold.NONE)
+                SafetySetting(HarmCategory.DANGEROUS_CONTENT, HarmBlockThreshold.NONE),
+                SafetySetting(HarmCategory.CIVIC_INTEGRITY, HarmBlockThreshold.NONE)
             ),
             systemInstruction = content { text(PromptFactory.systemInstruction(request)) }
         )
@@ -81,9 +93,26 @@ class FirebaseAiService(
         JSONObject(raw).optString("rewrite").trim()
     }.getOrDefault(raw).ifEmpty { raw }.trim()
 
+    /**
+     * The SDK raises [ResponseStoppedException] for *every* finish reason that isn't STOP, so a
+     * truncated response and a genuine safety block arrive as the same exception type. Split them
+     * on the reason itself — reporting a MAX_TOKENS truncation as "blocked by the safety filter"
+     * sends the user off rephrasing a message that was never the problem.
+     */
+    private fun ResponseStoppedException.stopReasonError(): RewriteError =
+        when (val reason = response.candidates.firstOrNull()?.finishReason) {
+            FinishReason.MAX_TOKENS -> RewriteError.TooLong
+            FinishReason.SAFETY,
+            FinishReason.PROHIBITED_CONTENT,
+            FinishReason.BLOCKLIST,
+            FinishReason.SPII -> RewriteError.Blocked
+            else -> RewriteError.Service(reason?.name ?: "unknown stop reason")
+        }
+
     private fun Throwable.toRewriteError(): RewriteError = when (this) {
         is RewriteError -> this
-        is PromptBlockedException, is ResponseStoppedException -> RewriteError.Blocked
+        is PromptBlockedException -> RewriteError.Blocked
+        is ResponseStoppedException -> stopReasonError()
         is QuotaExceededException -> RewriteError.RateLimited
         is InvalidAPIKeyException -> RewriteError.NotConfigured
         is RequestTimeoutException, is IOException -> RewriteError.Network
@@ -93,10 +122,6 @@ class FirebaseAiService(
     }
 
     companion object {
-        // Rolling alias — always resolves to the current Flash model, so it won't age out
-        // the way a pinned "gemini-2.5-flash" did. Pin a dated id only if you need stability.
-        const val DEFAULT_MODEL = "gemini-flash-latest"
-
         private val REWRITE_SCHEMA = Schema.obj(
             mapOf("rewrite" to Schema.string("The rewritten message body, nothing else."))
         )
