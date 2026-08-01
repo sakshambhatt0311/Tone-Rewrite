@@ -1,5 +1,6 @@
 package com.bhatt.tonerewriter.data
 
+import com.bhatt.tonerewriter.BuildConfig
 import com.bhatt.tonerewriter.domain.RewriteRequest
 
 /**
@@ -45,6 +46,14 @@ sealed class RewriteError(message: String, val retryable: Boolean) : Exception(m
         private fun readResolve(): Any = Blocked
     }
 
+    /** Generation hit the output-token ceiling before the model finished the sentence. */
+    data object TooLong : RewriteError(
+        "That rewrite got cut off before it finished. Try a shorter message.",
+        retryable = true
+    ) {
+        private fun readResolve(): Any = TooLong
+    }
+
     data object EmptyResponse : RewriteError(
         "The model returned nothing. Try again.",
         retryable = true
@@ -52,8 +61,16 @@ sealed class RewriteError(message: String, val retryable: Boolean) : Exception(m
         private fun readResolve(): Any = EmptyResponse
     }
 
+    /**
+     * Catch-all. [detail] carries the server's own wording, which debug builds put on screen —
+     * the generic phrasing alone hid a retired model id behind "try again" for far too long.
+     */
     data class Service(val detail: String) : RewriteError(
-        "The rewrite service failed. Try again.",
+        if (BuildConfig.DEBUG && detail.isNotBlank()) {
+            "Rewrite failed — $detail"
+        } else {
+            "The rewrite service failed. Try again."
+        },
         retryable = true
     )
 }
