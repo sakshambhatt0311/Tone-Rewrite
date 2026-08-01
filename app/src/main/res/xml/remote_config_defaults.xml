@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  In-app defaults for Firebase Remote Config. These cover first launch and offline, before any
+  fetch has succeeded. Keep model_name in step with ModelConfig.FALLBACK_MODEL.
+-->
+<defaultsMap>
+    <entry>
+        <key>model_name</key>
+        <value>gemini-3.6-flash</value>
+    </entry>
+</defaultsMap>
